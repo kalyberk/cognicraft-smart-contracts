@@ -33,12 +33,12 @@ contract CogniCraft is
         __Ownable_init();
     }
 
-    function safeMint(address to, string memory uri) external payable {
+    function safeMint(address to) external payable {
         require(msg.value == MINT_PRICE, "Pay the goddamn bill");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        _setTokenURI(tokenId, "");
     }
 
     function withdraw() external onlyOwner {
@@ -52,6 +52,7 @@ contract CogniCraft is
 
     function setTokenURI(uint256 tokenId, string calldata uri) external {
         require(ownerOf(tokenId) == msg.sender, "Not token owner");
+        require(bytes(tokenURI(tokenId)).length == 0, "URI already set");
         _setTokenURI(tokenId, uri);
     }
 

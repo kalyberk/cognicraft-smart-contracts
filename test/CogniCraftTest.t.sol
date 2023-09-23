@@ -46,30 +46,30 @@ contract CogniCraftTest is Test {
 
     function testSafeMint() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(owner, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(owner);
 
         assertEq(cogniCraft.ownerOf(0), owner);
-        assertEq(cogniCraft.tokenURI(0), "https://foo.com");
+        assertEq(bytes(cogniCraft.tokenURI(0)).length, 0);
         assertEq(cogniCraft.balanceOf(owner), 1);
     }
 
     function testSafeMintOtherThanOwner() public {
         vm.startPrank(bob);
-        cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(bob);
 
         assertEq(cogniCraft.ownerOf(0), bob);
-        assertEq(cogniCraft.tokenURI(0), "https://foo.com");
+        assertEq(bytes(cogniCraft.tokenURI(0)).length, 0);
         assertEq(cogniCraft.balanceOf(bob), 1);
     }
 
     function testFailSafeMint() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: 0}(owner, "https://foo.com");
+        cogniCraft.safeMint{value: 0}(owner);
     }
 
     function testTransferFrom() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(owner, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(owner);
         cogniCraft.safeTransferFrom(owner, bob, 0);
 
         assertEq(cogniCraft.ownerOf(0), bob);
@@ -80,7 +80,7 @@ contract CogniCraftTest is Test {
     function testGetBalance() public {
         vm.startPrank(owner);
         for (uint256 i = 0; i < 3; i++) {
-            cogniCraft.safeMint{value: mintPrice}(owner, "https://foo.com");
+            cogniCraft.safeMint{value: mintPrice}(owner);
         }
 
         assertEq(cogniCraft.balanceOf(owner), 3);
@@ -88,7 +88,7 @@ contract CogniCraftTest is Test {
 
     function testOnlyOwnerBurn() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(owner, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(owner);
         cogniCraft.burn(0);
 
         assertEq(cogniCraft.balanceOf(owner), 0);
@@ -96,7 +96,7 @@ contract CogniCraftTest is Test {
 
     function testFailBurn() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(owner, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(owner);
         vm.stopPrank();
 
         vm.prank(bob);
@@ -105,7 +105,7 @@ contract CogniCraftTest is Test {
 
     function testApprove() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(bob);
         vm.stopPrank();
 
         assertEq(cogniCraft.ownerOf(0), bob);
@@ -119,7 +119,7 @@ contract CogniCraftTest is Test {
 
     function testSetApprovalForAll() public {
         vm.startPrank(owner);
-        cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(bob);
         vm.stopPrank();
 
         vm.prank(bob);
@@ -132,7 +132,7 @@ contract CogniCraftTest is Test {
         vm.startPrank(bob);
         for (uint256 i = 0; i < 6; i++) {
             // Let it make some money
-            cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
+            cogniCraft.safeMint{value: mintPrice}(bob);
         }
         vm.stopPrank();
 
@@ -153,18 +153,25 @@ contract CogniCraftTest is Test {
 
     function testSetTokenURI() public {
         vm.startPrank(bob);
-        cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
-        cogniCraft.setTokenURI(0, "https://bar.com");
+        cogniCraft.safeMint{value: mintPrice}(bob);
+        cogniCraft.setTokenURI(0, "https://foo.com");
 
-        assertEq(cogniCraft.tokenURI(0), "https://bar.com");
+        assertEq(cogniCraft.tokenURI(0), "https://foo.com");
     }
 
     function testFailSetTokenURI() public {
         vm.startPrank(bob);
-        cogniCraft.safeMint{value: mintPrice}(bob, "https://foo.com");
+        cogniCraft.safeMint{value: mintPrice}(bob);
         vm.stopPrank();
 
         vm.prank(owner);
+        cogniCraft.setTokenURI(0, "https://foo.com");
+    }
+
+    function testFailSetTokenURIOnlyOnce() public {
+        vm.startPrank(bob);
+        cogniCraft.safeMint{value: mintPrice}(bob);
+        cogniCraft.setTokenURI(0, "https://foo.com");
         cogniCraft.setTokenURI(0, "https://bar.com");
     }
 }
