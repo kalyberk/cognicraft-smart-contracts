@@ -86,6 +86,48 @@ contract CogniCraftTest is Test {
         assertEq(cogniCraft.balanceOf(owner), 3);
     }
 
+    function testTotalSupply() public {
+        vm.startPrank(owner);
+        for (uint256 i = 0; i < 4; i++) {
+            cogniCraft.safeMint{value: mintPrice}(owner);
+        }
+        vm.stopPrank();
+
+        vm.prank(bob);
+        cogniCraft.safeMint{value: mintPrice}(bob);
+
+        assertEq(cogniCraft.totalSupply(), 5);
+    }
+
+    function testTokenByIndex() public {
+        vm.startPrank(owner);
+        for (uint256 i = 0; i < 2; i++) {
+            cogniCraft.safeMint{value: mintPrice}(owner);
+        }
+        vm.stopPrank();
+
+        vm.prank(bob);
+        cogniCraft.safeMint{value: mintPrice}(bob);
+
+        assertEq(cogniCraft.tokenByIndex(0), 0);
+        assertEq(cogniCraft.tokenByIndex(1), 1);
+        assertEq(cogniCraft.tokenByIndex(2), 2);
+    }
+
+    function testTokenOfOwnerByIndex() public {
+        vm.prank(bob);
+        cogniCraft.safeMint{value: mintPrice}(bob);
+
+        vm.startPrank(owner);
+        for (uint256 i = 0; i < 2; i++) {
+            cogniCraft.safeMint{value: mintPrice}(owner);
+        }
+
+        assertEq(cogniCraft.tokenOfOwnerByIndex(bob, 0), 0);
+        assertEq(cogniCraft.tokenOfOwnerByIndex(owner, 0), 1);
+        assertEq(cogniCraft.tokenOfOwnerByIndex(owner, 1), 2);
+    }
+
     function testOnlyOwnerBurn() public {
         vm.startPrank(owner);
         cogniCraft.safeMint{value: mintPrice}(owner);

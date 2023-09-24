@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@oz-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@oz-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@oz-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@oz-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@oz-upgradeable/access/OwnableUpgradeable.sol";
@@ -11,6 +12,7 @@ import "@oz-upgradeable/utils/CountersUpgradeable.sol";
 contract CogniCraft is
     Initializable,
     ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     ERC721BurnableUpgradeable,
     OwnableUpgradeable
@@ -28,6 +30,7 @@ contract CogniCraft is
 
     function initialize() public initializer {
         __ERC721_init("CogniCraft", "CC");
+        __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __Ownable_init();
@@ -44,6 +47,13 @@ contract CogniCraft is
     function withdraw() external onlyOwner {
         (bool s,) = payable(msg.sender).call{value: address(this).balance}("");
         require(s, "Withdraw failed");
+    }
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     function _burn(uint256 tokenId) internal override(ERC721Upgradeable, ERC721URIStorageUpgradeable) {
@@ -68,7 +78,7 @@ contract CogniCraft is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
